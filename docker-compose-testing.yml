@@ -1,0 +1,63 @@
+# Testing Configuration with Custom IP Addresses
+# This setup assigns different IP addresses to services for testing purposes
+# Admin service remains on localhost for SSRF testing
+
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "8081:80"
+    volumes:
+      - ./nginx-testing.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - blog
+      - admin
+      - logs
+    networks:
+      frontend:
+        ipv4_address: 192.168.100.10
+      backend:
+        ipv4_address: 192.168.200.10
+
+  blog:
+    build: ./blog
+    networks:
+      frontend:
+        ipv4_address: 192.168.100.20
+      backend:
+        ipv4_address: 192.168.200.20
+    environment:
+      - BLOG_HOST=0.0.0.0
+      - BLOG_PORT=5000
+
+  admin:
+    build: ./admin
+    networks:
+      backend:
+        ipv4_address: 192.168.200.30
+    environment:
+      - ADMIN_HOST=0.0.0.0
+      - ADMIN_PORT=5001
+
+  logs:
+    build: ./logs
+    networks:
+      backend:
+        ipv4_address: 192.168.200.40
+    environment:
+      - LOGS_HOST=0.0.0.0
+      - LOGS_PORT=5002
+
+networks:
+  frontend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+          gateway: 192.168.100.1
+  backend:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.200.0/24
+          gateway: 192.168.200.1
