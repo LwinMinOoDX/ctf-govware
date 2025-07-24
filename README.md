@@ -1,6 +1,6 @@
 # Blogging Website CTF Challenge
 
-This is a Capture The Flag (CTF) challenge that involves a multi-container Docker setup with a blogging website, an admin panel, and a logs server.
+This is a Capture The Flag (CTF) challenge designed for deployment on CTFd platform. It involves a multi-container Docker setup with a blogging website, an admin panel, and a logs server.
 
 ## Challenge Overview
 
@@ -10,29 +10,35 @@ The challenge consists of three Docker containers:
 2. **Admin Panel** - Only accessible via localhost with a command injection vulnerability
 3. **Logs Server** - Contains logs and the flag is in the directory above the logs
 
-## Quick Start
+## For CTFd Administrators
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd CTF_GOVWARE
-   ```
+This challenge is designed to be deployed on CTFd where each participant gets their own isolated instance. See [CTFD_DEPLOYMENT.md](CTFD_DEPLOYMENT.md) for detailed deployment instructions.
 
-2. **Start the containers:**
-   ```bash
-   docker-compose up -d
-   ```
+### Docker Images Available
+- **eddx/ctf-govware-blog:latest** - Blog service with SSRF vulnerability
+- **eddx/ctf-govware-admin:latest** - Admin panel with command injection
+- **eddx/ctf-govware-logs:latest** - Logs service containing the flag
 
-3. **Access the applications:**
-   - Blog: http://localhost:8080
-   - Admin Panel: http://localhost:8080/admin (only accessible locally)
-   - Health Check: http://localhost:8080/health
+### Key Features for CTFd
+- Individual isolated instances per participant
+- Automatic flag generation for each instance
+- Multi-container architecture with network isolation
+- Nginx reverse proxy for proper routing
 
-**Key features:**
-- Uses Nginx reverse proxy for routing
-- Admin panel accessible at `/admin` path
-- Rate limiting applied to admin panel (10 requests/minute)
-- Admin access restricted to localhost only via nginx configuration
+## Development/Testing Setup
+
+For development or testing purposes only:
+
+```bash
+# Build and start the containers
+docker-compose up -d
+
+# Access the applications
+# Blog: http://localhost:8080
+# Admin Panel: http://localhost:8080/admin (only accessible locally)
+```
+
+**Note**: This setup is for development only. For CTF deployment, use CTFd platform with the provided Docker images.
 
 ## Challenge Walkthrough
 
