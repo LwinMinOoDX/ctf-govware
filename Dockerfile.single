@@ -1,0 +1,75 @@
+# Single container version for Nixpacks compatibility
+FROM python:3.9-slim
+
+# Install nginx and supervisor
+RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+WORKDIR /app
+
+# Copy all services (original templates and static files)
+COPY blog/ /app/blog/
+COPY admin/ /app/admin/
+COPY logs/ /app/logs/
+
+# Copy single-container modified apps
+COPY blog_app.py /app/blog_app.py
+COPY admin_app.py /app/admin_app.py
+COPY logs_app.py /app/logs_app.py
+COPY nginx-single.conf /etc/nginx/nginx.conf
+
+# Create log directories
+RUN mkdir -p /var/log/admin /var/log/app /var/log/supervisor
+
+# Create some sample log files for the CTF
+RUN echo "Admin service started at $(date)" > /var/log/admin/admin.log
+RUN echo "System log entry at $(date)" > /var/log/app/system.log
+RUN echo "flag{single_container_deployment_success}" > /var/log/admin/flag.txt
+
+# Install Python dependencies for all services
+RUN pip install flask requests
+
+# Create supervisor configuration
+RUN echo '[supervisord]' > /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'nodaemon=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'user=root' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:nginx]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=nginx -g "daemon off;"' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stderr_logfile=/var/log/supervisor/nginx.err.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stdout_logfile=/var/log/supervisor/nginx.out.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:blog]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=python /app/blog_app.py' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'directory=/app' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stderr_logfile=/var/log/supervisor/blog.err.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stdout_logfile=/var/log/supervisor/blog.out.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:admin]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=python /app/admin_app.py' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'directory=/app' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stderr_logfile=/var/log/supervisor/admin.err.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stdout_logfile=/var/log/supervisor/admin.out.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo '[program:logs]' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'command=python /app/logs_app.py' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'directory=/app' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autostart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'autorestart=true' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stderr_logfile=/var/log/supervisor/logs.err.log' >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo 'stdout_logfile=/var/log/supervisor/logs.out.log' >> /etc/supervisor/conf.d/supervisord.conf
+
+# Expose port
+EXPOSE 80
+
+# Start supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

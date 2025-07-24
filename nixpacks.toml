@@ -1,0 +1,18 @@
+[variables]
+NIXPACKS_NO_CACHE = "1"
+
+[phases.setup]
+cmds = [
+  "echo 'Building single-container CTF application'"
+]
+
+[phases.build]
+cmds = [
+  "echo 'Building from Dockerfile.single for Nixpacks compatibility'"
+]
+
+[build]
+dockerfile = "Dockerfile.single"
+
+[start]
+cmd = "/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"
