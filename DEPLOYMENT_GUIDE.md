@@ -1,41 +1,33 @@
 # CTF Govware Deployment Guide
 
-## 🎯 Nixpacks Solution (Single Container)
+## 🎯 Multi-Container Architecture
 
-**✅ FIXED!** This repository now includes a `Dockerfile.single` and `nixpacks.toml` that makes it compatible with Nixpacks-based platforms like Railway, Render, and others.
+This CTF uses a multi-container architecture with Docker Compose for easy deployment and service isolation.
 
-### For Nixpacks Platforms (Railway, Render, etc.):
+### Services:
+- **Blog**: Main web application (port 80)
+- **Admin**: Administrative panel (internal access only)
+- **Logs**: Log viewing service (internal access only)
+- **Nginx**: Reverse proxy and load balancer
 
-1. **Push to GitHub** (if not already done):
-   ```bash
-   git add .
-   git commit -m "Add Nixpacks support"
-   git push origin main
-   ```
-
-2. **Deploy on Railway**:
-   - Connect your GitHub repository
-   - Railway will automatically detect `nixpacks.toml`
-   - The app will build using `Dockerfile.single`
-   - Access your CTF at the provided Railway URL
-
-3. **Deploy on Render**:
-   - Connect your GitHub repository
-   - Render will use the Nixpacks configuration
-   - Access your CTF at the provided Render URL
-
-### Quick Deploy with DockerHub:
-Alternatively, you can deploy the pre-built image directly:
+### Quick Start:
 ```bash
-docker run -p 80:80 eddx/ctf-govware-single:latest
+git clone https://github.com/LwinMinOoDX/ctf-govware.git
+cd ctf-govware
+docker-compose up -d
 ```
 
-### How the Single Container Works:
-- All services (blog, admin, logs) run on different ports (5000, 5001, 5002)
-- Nginx reverse proxy routes traffic appropriately
-- Supervisor manages all processes in one container
-- SSRF vulnerability: Use `http://localhost:5001` to access admin
-- Admin panel accessible at `/admin` path
+### Access:
+- **CTF Website**: http://localhost
+- **Admin Panel**: Accessible via SSRF vulnerability using `http://admin`
+- **Logs Service**: Accessible via SSRF vulnerability using `http://logs`
+
+### SSRF Vulnerability:
+The blog application has an SSRF vulnerability that allows access to internal services:
+```
+http://localhost/fetch-next?url=http://admin
+http://localhost/fetch-next?url=http://logs
+```
 
 ## 🚀 Multi-Container Deployment Options (Original)
 
