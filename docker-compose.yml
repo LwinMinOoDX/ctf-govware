@@ -8,8 +8,10 @@ services:
     depends_on:
       - blog
       - admin
+      - logs
     networks:
       - blog_network
+      - admin_logs_network
 
   blog:
     image: eddx/ctf-govware-blog:latest

@@ -71,11 +71,14 @@ def fetch_next():
                 response = requests.post(url, data=request.form, timeout=3)
             else:
                 response = requests.get(url, timeout=3)
+            
             return response.text
         except Exception as e:
             return jsonify({'error': str(e)}), 500
     
     return jsonify({'error': 'No URL provided'}), 400
+
+
 
 @app.route('/about')
 def about():

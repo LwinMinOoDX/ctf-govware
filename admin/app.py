@@ -46,6 +46,13 @@ ADMIN_TEMPLATE = """
             <p>Welcome to the admin dashboard. Use the navigation above to manage the system.</p>
         {% elif page == 'logs' %}
             <h2>System Logs</h2>
+            <p>Available log files:</p>
+            <ul>
+                <li><strong>admin.log</strong> - Administrative actions and events</li>
+                <li><strong>error.log</strong> - System error messages</li>
+                <li><strong>access.log</strong> - User access logs</li>
+                <li><strong>flag.txt</strong> - Here's the flag but how would you read it?</li>
+            </ul>
             <p>View system logs by specifying the log file name:</p>
             
             <form method="POST" action="/logs">
